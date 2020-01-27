@@ -1,9 +1,9 @@
 ///////////////////////////////////
-// square.cpp
+// hw2.cpp
 //
 // OpenGL program to draw a square.
 //
-// Sumanta Guha.
+// Sundeep penkay.
 ///////////////////////////////////
 
 #include <iostream>
@@ -175,8 +175,8 @@ int main(int argc, char **argv)
 {
 	glutInit(&argc, argv);
 
-//	glutInitContextVersion(4, 3);
-//	glutInitContextProfile(GLUT_COMPATIBILITY_PROFILE);
+	glutInitContextVersion(4, 3);
+	glutInitContextProfile(GLUT_COMPATIBILITY_PROFILE);
 
 	glutInitDisplayMode(GLUT_SINGLE | GLUT_RGBA);
 
