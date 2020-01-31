@@ -205,7 +205,7 @@ int main(int argc, char **argv)
 	glutInitWindowSize(500, 500);
 	glutInitWindowPosition(100, 100);
 
-	glutCreateWindow("square.cpp");
+	glutCreateWindow("hw2.cpp");
 
 	glutDisplayFunc(drawScene);
 	glutReshapeFunc(resize);
