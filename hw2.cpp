@@ -26,14 +26,38 @@ class Point{
 	} 
 };
 
-// Draw Circle
+// NOTE: NOT USED Draw Circle
 void drawCircle(Point p, float radius, int numVertices){
 	float t = 0;
-	glBegin(GL_POLYGON);
+	glBegin(GL_POINTS);
 	for(int i=0;i<numVertices;++i){
 		glVertex3f(p.x+radius*cos(t), p.y+radius*sin(t), p.z);
 		t+=2*PI/numVertices;
 	}
+	glEnd();
+}
+
+
+// Draw Disk with filled surface from inner radius to width
+void drawDisk(Point p, float inRadius, float width){
+	int numVertices = 100;
+	float t = 0;
+	glBegin(GL_TRIANGLE_STRIP);
+	
+	Point ip1 = Point(p.x+inRadius*cos(t), p.y+inRadius*sin(t), p.z);
+	Point op1 = Point(p.x+(inRadius+width)*cos(t), p.y+(inRadius+width)*sin(t), p.z);
+	
+	for(int i=0;i<numVertices;++i){
+		Point ip= Point(p.x+inRadius*cos(t), p.y+inRadius*sin(t), p.z);
+		Point op = Point(p.x+(inRadius+width)*cos(t), p.y+(inRadius+width)*sin(t), p.z);		
+		glVertex3f(ip.x,ip.y,ip.z);		
+		glVertex3f(op.x,op.y,op.z);
+		t+=2*PI/numVertices;	
+	}
+	
+	glVertex3f(ip1.x,ip1.y,ip1.z);
+	glVertex3f(op1.x,op1.y,op1.z);
+
 	glEnd();
 }
 
@@ -85,9 +109,7 @@ void drawScene(void)
 	glClear(GL_COLOR_BUFFER_BIT);
 	Point O(W/2, H/2, 0.0);
 	glColor3f(0.4, 0.4, 0.4);
-	drawCircle(O, (7*N)/2, 500);
-	glColor3f(1.0, 1.0, 1.0);
-	drawCircle(O, ((7*N)/2) - (N/3), 500);
+	drawDisk(O, ((7*N)/2), N/3);
 
 	glColor3f(0.0,0.0,1.0);
 	Point p1(W/2, H/2 + ((7*N)/2) - N/3, 0.0);
@@ -175,8 +197,8 @@ int main(int argc, char **argv)
 {
 	glutInit(&argc, argv);
 
-	glutInitContextVersion(4, 3);
-	glutInitContextProfile(GLUT_COMPATIBILITY_PROFILE);
+	//glutInitContextVersion(4, 3);
+	//glutInitContextProfile(GLUT_COMPATIBILITY_PROFILE);
 
 	glutInitDisplayMode(GLUT_SINGLE | GLUT_RGBA);
 
