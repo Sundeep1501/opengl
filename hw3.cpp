@@ -37,17 +37,40 @@ class Point{
 	}
 };
 
+// class to hold 3D point
+class Color{
+	public:
+		float r,g,b;
+	Color(float x, float y, float z){
+		r = x;
+		g = y;
+		b = z;
+	}
+	void print(){
+		cout<<r<<", "<<g<<", "<<b<<endl;
+	}
+};
+
 int game = -1;
 int selected = -1;
 int isSpinning = 0;
 int needleAngle = 360;
+int shapeAngle = 0;
 int remaining = 0;
 char* hint = "Select a shape to begin";
+int mx=0;
+int my=0;
 
 Point triangleP(0, 0, 0);
 Point starP(0, 0, 0);
 Point rombusP(0, 0, 0);
 Point crossP(0, 0, 0);
+
+Color triColor(0.0, 0.0, 1.0);
+Color starColor(0.0, 1.0, 0.0);
+Color rombusColor(1.0, 1.0, 0.0);
+Color crossColor(1.0, 0.0, 0.0);
+Color color(0.7,0.0,0.3);
 
 // Routine to draw a stroke character string.
 void writeStrokeString(void *font, char *string){
@@ -102,16 +125,25 @@ void drawTriangle(Point p1, Point p2, Point p3){
 
 // Draw equilateral triangle around the center point with given side of triangle
 void drawEquiTriangle(){
+
 	float radius = N/1.7320;
-	
 	float t = 0;
 	Point A(radius*cos(t), radius*sin(t), 0);
 	t+=2*PI/3;
 	Point B(radius*cos(t), radius*sin(t), 0);
 	t+=2*PI/3;
 	Point C(radius*cos(t), radius*sin(t), 0);
-	
+		
+	if(selected == TRIANGLE){		
+		glPushMatrix();
+		glScalef(1.2,1.2,1.0);
+		glColor3f(0.0,0.0,0.0);
+		drawTriangle(A, B, C);
+		glPopMatrix();
+	}
+	glColor3f(triColor.r, triColor.g, triColor.b);
 	drawTriangle(A, B, C);
+	
 }
 
 void drawNeedle(){
@@ -143,6 +175,14 @@ void drawRombus(){
 	Point p2(N/-2, 0, 0.0);
 	Point p3(0, N/-2, 0.0);
 	Point p4(N/2, 0, 0.0);
+	if(selected == RHOMBUS){		
+		glPushMatrix();
+		glScalef(1.2,1.2,1.0);
+		glColor3f(0.0,0.0,0.0);
+		drawRectangle(p1, p2, p3, p4);
+		glPopMatrix();
+	}
+	glColor3f(rombusColor.r, rombusColor.g, rombusColor.b);
 	drawRectangle(p1, p2, p3, p4);
 }
 
@@ -151,13 +191,22 @@ void drawCross(){
 	Point p2(N/2, N/6, 0.0);
 	Point p3(N/2, N/-6, 0.0);
 	Point p4(N/-2, N/-6, 0.0);
+	Point p5(N/-6, N/2, 0.0);
+	Point p6(N/6, N/2, 0.0);
+	Point p7(N/6, N/-2, 0.0);
+	Point p8(N/-6, N/-2, 0.0);
+	
+	if(selected == CROSS){		
+		glPushMatrix();
+		glScalef(1.2,1.2,1.0);
+		glColor3f(0.0,0.0,0.0);
+		drawRectangle(p1, p2, p3, p4);
+		drawRectangle(p5, p6, p7, p8);
+		glPopMatrix();
+	}
+	glColor3f(crossColor.r, crossColor.g, crossColor.b);
 	drawRectangle(p1, p2, p3, p4);
-
-	p1 = Point(N/-6, N/2, 0.0);
-	p2 = Point(N/6, N/2, 0.0);
-	p3 = Point(N/6, N/-2, 0.0);
-	p4 = Point(N/-6, N/-2, 0.0);
-	drawRectangle(p1, p2, p3, p4);
+	drawRectangle(p5, p6, p7, p8);
 }
 
 //Draw 5Point star within given center and pentagon diagonal
@@ -175,6 +224,19 @@ void draw5PointStar(){
 	Point C(radius*cos(t), radius*sin(t), 0);
 
 	Point O(0, 0, 0);
+
+	if(selected == STAR){		
+		glPushMatrix();
+		glScalef(1.2,1.2,1.0);
+		glColor3f(0.0,0.0,0.0);
+		drawTriangle(A,B,O);
+		drawTriangle(A,E,O);
+		drawTriangle(D,E,O);
+		drawTriangle(D,C,O);
+		drawTriangle(B,C,O);
+		glPopMatrix();
+	}
+	glColor3f(starColor.r, starColor.g, starColor.b);
 	drawTriangle(A,B,O);
 	drawTriangle(A,E,O);
 	drawTriangle(D,E,O);
@@ -192,13 +254,11 @@ void drawScene(void){
 	glPushMatrix();
 	glTranslatef(triangleP.x, triangleP.y, triangleP.z);
 	glRotatef(90, 0.0, 0.0, 1.0);
-	glColor3f(0.0,0.0,1.0);
 	drawEquiTriangle();
 	glPopMatrix();
 
 	glPushMatrix();
 	glTranslatef(rombusP.x, rombusP.y, rombusP.z);
-	glColor3f(1.0, 1.0, 0.0);
 	drawRombus();
 	glPopMatrix();
 	
@@ -247,11 +307,57 @@ void drawScene(void){
 		txt = "You Loose!";
 	}
 	glPushMatrix();
-	glTranslatef(W/-2, (H/-2) *0.9, 0.0);
+	glTranslatef(W/-2, (H/-2) * 0.9, 0.0);
 	glScalef(0.1, 0.1, 0.1);
 	writeStrokeString(GLUT_STROKE_MONO_ROMAN, txt);
 	glPopMatrix();
 	glFlush();
+}
+
+void color_menu(int id) {
+	switch(id){
+		case 1:
+			color = Color(0.7,0.0,0.3);
+			break;
+		case 2:
+			color = Color(1.0, 0.5, 0.0);
+			break;
+		case 3:
+			color = Color(0.0, 0.8, 0.8);
+			break;
+		case 4:
+			color = Color(0.8, 0.2, 0.4);
+			break;
+	}
+
+	float d = sqrt(pow(mx-triangleP.x, 2)+pow(my-triangleP.y, 2));
+	if(d <= (N/1.7320)){
+		triColor = color;
+	}
+	d = sqrt(pow(mx-starP.x, 2)+pow(my-starP.y, 2));
+	if(d <= (N/2)){
+		starColor = color;
+	}
+	d = sqrt(pow(mx-rombusP.x, 2)+pow(my-rombusP.y, 2));
+	if(d <= (N/2)){
+		rombusColor = color;
+	}
+	d = sqrt(pow(mx-crossP.x, 2)+pow(my-crossP.y, 2));
+	if(d <= (N/2)){
+		crossColor = color;
+	}
+}
+
+// Routine to make the menu.
+void makeMenu(void) {
+	glutCreateMenu(color_menu);
+	glutAddMenuEntry("Purple",1);
+	glutAddMenuEntry("Orange",2);
+	glutAddMenuEntry("Cyan",3);
+	glutAddMenuEntry("Pink",4);
+	
+	// The menu is attached to a mouse button.
+	glutAttachMenu(GLUT_RIGHT_BUTTON);
 }
 
 // Initialization routine.
@@ -261,6 +367,7 @@ void setup(void){
 	starP = Point(((-7*N)/2)+N/3+N/2, 0, 0.0);
 	rombusP = Point(0, ((-7*N)/2) + N/3 + N/2, 0.0);
 	crossP = Point(((7*N)/2)-N/3-N/2, 0, 0.0);
+	makeMenu();
 }
 
 // OpenGL window reshape routine.
@@ -283,36 +390,48 @@ void mouseControl(int button, int state, int x, int y){
 	x = x - W/2;
 	y = y - H/2;
 	y = y*-1;
-	if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN){
-		float d = sqrt(pow(x-triangleP.x, 2)+pow(y-triangleP.y, 2));
-		if(d <= (N/1.7320)){
-			cout<<"Triangle"<<endl;
+	float d = sqrt(pow(x-triangleP.x, 2)+pow(y-triangleP.y, 2));
+	if(d <= (N/1.7320)){
+		cout<<"Triangle"<<endl;
+		if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN){
 			selected = TRIANGLE;
-			game = -1;
+			game = -1;		
 		}
-		d = sqrt(pow(x-starP.x, 2)+pow(y-starP.y, 2));
-		if(d <= (N/2)){
-			cout<<"Star"<<endl;
+	}
+	d = sqrt(pow(x-starP.x, 2)+pow(y-starP.y, 2));
+	if(d <= (N/2)){
+		cout<<"Star"<<endl;
+		if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN){
 			selected = STAR;
 			game = -1;
 		}
-		d = sqrt(pow(x-rombusP.x, 2)+pow(y-rombusP.y, 2));
-		if(d <= (N/2)){
-			cout<<"Rhombus"<<endl;
+	}
+	d = sqrt(pow(x-rombusP.x, 2)+pow(y-rombusP.y, 2));
+	if(d <= (N/2)){
+		cout<<"Rhombus"<<endl;
+		if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN){
 			selected = RHOMBUS;
 			game = -1;
 		}
-		d = sqrt(pow(x-crossP.x, 2)+pow(y-crossP.y, 2));
-		if(d <= (N/2)){
-			cout<<"Cross"<<endl;
+	}
+	d = sqrt(pow(x-crossP.x, 2)+pow(y-crossP.y, 2));
+	if(d <= (N/2)){
+		cout<<"Cross"<<endl;
+		if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN){
 			selected = CROSS;
 			game = -1;
 		}
 	}
-	if (button == GLUT_RIGHT_BUTTON && state == GLUT_DOWN)
-		exit(0);
 
 	glutPostRedisplay();
+}
+
+void motion(int x, int y) {
+	x = x - W/2;
+	y = y - H/2;
+	y = y*-1;
+	mx = x;
+	my = y;
 }
 
 //Timer function is called in every MSEC_PER_FRAME milliseconds
@@ -330,7 +449,7 @@ void timerFunc(int value){
 		glutTimerFunc(MSEC_PER_FRAME, timerFunc, value);
 	} else {
 		isSpinning = 0;
-		if(selected == TRIANGLE && needleAngle == 360){
+		if(selected == TRIANGLE && (needleAngle == 360 || needleAngle == 0)){
 			game = 1;
 		} else if(selected == CROSS && needleAngle == 270){
 			game = 1;
@@ -346,6 +465,19 @@ void timerFunc(int value){
 
 }
 
+void rotateShape(int value){
+	float radius = ((7*N)/2) - N/3 - N/2;
+	triangleP = Point(radius*cos(shapeAngle), radius*sin(shapeAngle), triangleP.z);
+	
+	shapeAngle += 2*PI/72;
+	//if(shapeAngle != 90 && shapeAngle != 180 && shapeAngle != 270 && shapeAngle != 360){
+		glutTimerFunc(1000, rotateShape, value);
+	//}
+
+	glutPostRedisplay();
+}
+
+
 // Keyboard input processing routine.
 void keyInput(unsigned char key, int x, int y){
 	switch (key){
@@ -359,6 +491,10 @@ void keyInput(unsigned char key, int x, int y){
 			remaining = 4 + (rand() % 12);
 			glutTimerFunc(MSEC_PER_FRAME, timerFunc, 1);
 		}
+		break;
+	case 82:
+	case 114:
+		glutTimerFunc(MSEC_PER_FRAME, rotateShape, 1);
 		break;
 	default:
 		break;
@@ -383,6 +519,8 @@ int main(int argc, char **argv){
 	glutReshapeFunc(resize);
 	glutKeyboardFunc(keyInput);
 	glutMouseFunc(mouseControl);
+	glutMotionFunc(motion);
+	glutPassiveMotionFunc(motion);
 
 	setup();
 
